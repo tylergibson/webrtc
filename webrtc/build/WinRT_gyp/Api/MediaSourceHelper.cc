@@ -34,7 +34,7 @@ namespace Org {
 
 			// Helper functions defined below.
 			bool IsSampleIDR(IMFSample* sample);
-			bool DropFramesToIDR(std::list<cricket::VideoFrame*>& frames);
+			bool DropFramesToIDR(std::list<webrtc::VideoFrame*>& frames);
 
 
 			SampleData::SampleData()
@@ -45,7 +45,7 @@ namespace Org {
 			}
 
 			MediaSourceHelper::MediaSourceHelper(bool isH264,
-				std::function<HRESULT(cricket::VideoFrame* frame, IMFSample** sample)> mkSample,
+				std::function<HRESULT(webrtc::VideoFrame* frame, IMFSample** sample)> mkSample,
 				std::function<void(int)> fpsCallback)
 				: _mkSample(mkSample)
 				, _fpsCallback(fpsCallback)
@@ -57,7 +57,7 @@ namespace Org {
 				, _isH264(isH264)
 				, _frameCounter(0)
 				, _startTime(0)
-				, _lastTimeFPSCalculated(webrtc::TickTime::Now())
+				, _lastTimeFPSCalculated(rtc::TimeMillis())
 				, _lock(webrtc::CriticalSectionWrapper::CreateCriticalSection()) {
 
 			}
@@ -65,12 +65,12 @@ namespace Org {
 				webrtc::CriticalSectionScoped csLock(_lock.get());
 				// Clear the buffered frames.
 				while (!_frames.empty()) {
-					rtc::scoped_ptr<cricket::VideoFrame> frame(_frames.front());
+					rtc::scoped_refptr<webrtc::VideoFrame> frame(_frames.front());
 					_frames.pop_front();
 				}
 			}
 
-			void MediaSourceHelper::QueueFrame(cricket::VideoFrame* frame) {
+			void MediaSourceHelper::QueueFrame(webrtc::VideoFrame* frame) {
 				webrtc::CriticalSectionScoped csLock(_lock.get());
 
 				if (_isH264) {
@@ -101,14 +101,14 @@ namespace Org {
 				}
 			}
 
-			rtc::scoped_ptr<SampleData> MediaSourceHelper::DequeueFrame() {
+			rtc::scoped_refptr<SampleData> MediaSourceHelper::DequeueFrame() {
 				webrtc::CriticalSectionScoped csLock(_lock.get());
 
 				if (_frames.size() == 0) {
 					return nullptr;
 				}
 
-				rtc::scoped_ptr<SampleData> data;
+				rtc::scoped_refptr<SampleData> data;
 				if (_isH264) {
 					data = DequeueH264Frame();
 				}
@@ -153,15 +153,15 @@ namespace Org {
 
 			// === Private functions below ===
 
-			rtc::scoped_ptr<SampleData> MediaSourceHelper::DequeueH264Frame() {
+			rtc::scoped_refptr<SampleData> MediaSourceHelper::DequeueH264Frame() {
 
 				if (_frames.size() > 15)
 					DropFramesToIDR(_frames);
 
-				rtc::scoped_ptr<cricket::VideoFrame> frame(_frames.front());
+				rtc::scoped_refptr<webrtc::VideoFrame> frame(_frames.front());
 				_frames.pop_front();
 
-				rtc::scoped_ptr<SampleData> data(new SampleData);
+				rtc::scoped_refptr<SampleData> data(new SampleData);
 
 				// Get the IMFSample in the frame.
 				{
@@ -183,11 +183,11 @@ namespace Org {
 				return data;
 			}
 
-			rtc::scoped_ptr<SampleData> MediaSourceHelper::DequeueI420Frame() {
-				rtc::scoped_ptr<cricket::VideoFrame> frame(_frames.front());
+			rtc::scoped_refptr<SampleData> MediaSourceHelper::DequeueI420Frame() {
+				rtc::scoped_refptr<webrtc::VideoFrame> frame(_frames.front());
 				_frames.pop_front();
 
-				rtc::scoped_ptr<SampleData> data(new SampleData);
+				rtc::scoped_refptr<SampleData> data(new SampleData);
 
 				if (FAILED(_mkSample(frame.get(), &data->sample))) {
 					return nullptr;
@@ -245,8 +245,8 @@ namespace Org {
 				return false;
 			}
 
-			bool DropFramesToIDR(std::list<cricket::VideoFrame*>& frames) {
-				cricket::VideoFrame* idrFrame = nullptr;
+			bool DropFramesToIDR(std::list<webrtc::VideoFrame*>& frames) {
+				webrtc::VideoFrame* idrFrame = nullptr;
 				// Go through the frames in reverse order (from newest to oldest) and look
 				// for an IDR frame.
 				for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
@@ -278,12 +278,12 @@ namespace Org {
 
 			void MediaSourceHelper::SetStartTimeNow() {
 				webrtc::CriticalSectionScoped csLock(_lock.get());
-				_startTickTime = webrtc::TickTime::Now();
+				_startTickTime = rtc::TimeMillis();
 				if (_isH264) {
 					if (!DropFramesToIDR(_frames)) {
 						// Flush all frames then.
 						while (!_frames.empty()) {
-							rtc::scoped_ptr<cricket::VideoFrame> frame(_frames.front());
+							rtc::scoped_refptr<webrtc::VideoFrame> frame(_frames.front());
 							_frames.pop_front();
 						}
 					}
@@ -295,10 +295,10 @@ namespace Org {
 				if (_isH264) {
 #ifdef USE_WALL_CLOCK
 					if (_startTickTime.Ticks() == 0) {
-						_startTickTime = webrtc::TickTime::Now();
+						_startTickTime = rtc::TimeMillis();
 						return 0;
 					}
-					LONGLONG frameTime = ((webrtc::TickTime::Now() - _startTickTime).Milliseconds() + _futureOffsetMs) * 1000 * 10;
+					LONGLONG frameTime = ((rtc::TimeMillis() - _startTickTime).Milliseconds() + _futureOffsetMs) * 1000 * 10;
 #else
 					if (_startTime == 0) {
 
@@ -319,7 +319,7 @@ namespace Org {
 				}
 			}
 
-			void MediaSourceHelper::CheckForAttributeChanges(cricket::VideoFrame* frame, SampleData* data) {
+			void MediaSourceHelper::CheckForAttributeChanges(webrtc::VideoFrame* frame, SampleData* data) {
 				SIZE currentSize = { (LONG)frame->GetWidth(), (LONG)frame->GetHeight() };
 				if (_lastSize.cx != currentSize.cx || _lastSize.cy != currentSize.cy) {
 					data->sizeHasChanged = true;
@@ -344,7 +344,7 @@ namespace Org {
 				// Do FPS calculation and notification.
 				_frameCounter++;
 				// If we have about a second worth of frames
-				webrtc::TickTime now = webrtc::TickTime::Now();
+				webrtc::TickTime now = rtc::TimeMillis();
 				if ((now - _lastTimeFPSCalculated).Milliseconds() > 1000) {
 					_fpsCallback(_frameCounter);
 					_frameCounter = 0;

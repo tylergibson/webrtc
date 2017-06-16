@@ -150,6 +150,13 @@ rtc_static_library("rtc_media") {
   }
 
   if (is_win) {
+    if (is_winrt) {
+      sources += [
+        "devices/winrtdevicemanager.cc",
+        "devices/winrtdevicemanager.h",
+      ]
+    }
+
     cflags = [
       "/wd4245",  # conversion from "int" to "size_t", signed/unsigned mismatch.
       "/wd4267",  # conversion from "size_t" to "int", possible loss of data.

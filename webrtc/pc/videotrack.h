@@ -29,6 +29,15 @@ class VideoTrack : public MediaStreamTrack<VideoTrackInterface>,
       const std::string& label,
       VideoTrackSourceInterface* source);
 
+#ifdef WINRT
+  bool Suspend() override { return false; }
+  bool Resume() override { return false; }
+  bool IsSuspended() override { return false; }
+
+  void SetIsH264Source(bool isH264) override { }
+  bool IsH264Source() override { return false; }
+#endif
+
   void AddOrUpdateSink(rtc::VideoSinkInterface<VideoFrame>* sink,
                        const rtc::VideoSinkWants& wants) override;
   void RemoveSink(rtc::VideoSinkInterface<VideoFrame>* sink) override;

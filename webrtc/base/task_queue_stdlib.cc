@@ -20,6 +20,7 @@ typedef std::chrono::system_clock::time_point Time;
 namespace rtc {
 namespace {
 
+using Priority = TaskQueue::Priority;
 static thread_local void *g_thread_context {};
 
 static void *GetQueuePtrTls()
@@ -40,7 +41,7 @@ static Time now()
 
 }  // namespace
 
-TaskQueue::TaskQueue(const char* queue_name)
+TaskQueue::TaskQueue(const char* queue_name, Priority priority /*= NORMAL*/)
     : thread_(&TaskQueue::ThreadMain, this, queue_name) {
   RTC_DCHECK(queue_name);
   thread_.Start();

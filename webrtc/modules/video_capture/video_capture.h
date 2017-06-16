@@ -88,13 +88,13 @@ class VideoCaptureModule: public rtc::RefCountInterface {
       const VideoCaptureCapability& capability) = 0;
 
   virtual int32_t StopCapture() = 0;
-
+#ifdef WINRT
   virtual bool SuspendCapture() = 0;
 
   virtual bool ResumeCapture() = 0;
 
   virtual bool IsSuspended() = 0;
-
+#endif //WINRT
   // Returns the name of the device used by this module.
   virtual const char* CurrentDeviceName() const = 0;
 

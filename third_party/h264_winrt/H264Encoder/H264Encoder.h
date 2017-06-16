@@ -18,7 +18,7 @@
 #include <vector>
 #include "H264MediaSink.h"
 #include "IH264EncodingCallback.h"
-#include "Utils/SampleAttributeQueue.h"
+#include "../Utils/SampleAttributeQueue.h"
 #include "webrtc/video_encoder.h"
 #include "webrtc/system_wrappers/include/critical_section_wrapper.h"
 #include "webrtc/modules/video_coding/utility/quality_scaler.h"

@@ -38,6 +38,16 @@ class VideoTrackSource : public Notifier<VideoTrackSourceInterface> {
 
   bool GetStats(Stats* stats) override { return false; }
 
+#ifdef WINRT
+  // Suspend/Resume flow default behavior
+  bool Suspend() override { return false; }
+  bool Resume() override { return false; }
+  bool IsSuspended() override { return false; }
+
+  void SetIsH264Source(bool is_h264_source) override;
+  bool IsH264Source() override;
+#endif
+
   void AddOrUpdateSink(rtc::VideoSinkInterface<VideoFrame>* sink,
                        const rtc::VideoSinkWants& wants) override;
   void RemoveSink(rtc::VideoSinkInterface<VideoFrame>* sink) override;

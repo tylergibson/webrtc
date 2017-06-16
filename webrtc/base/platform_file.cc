@@ -42,6 +42,19 @@ bool RemoveFile(const std::string& path) {
   return ::DeleteFile(ToUtf16(path).c_str()) != 0;
 }
 
+#ifdef WINRT
+PlatformFile OpenPlatformFile(const std::string& path) {
+  return ::CreateFile2(ToUtf16(path).c_str(), GENERIC_READ | GENERIC_WRITE,
+                      FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 
+                      OPEN_EXISTING, nullptr);
+}
+
+PlatformFile CreatePlatformFile(const std::string& path) {
+  return ::CreateFile2(ToUtf16(path).c_str(), GENERIC_READ | GENERIC_WRITE,
+                      FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, 
+                      CREATE_ALWAYS, nullptr);
+}
+#else
 PlatformFile OpenPlatformFile(const std::string& path) {
   return ::CreateFile(ToUtf16(path).c_str(), GENERIC_READ | GENERIC_WRITE, 0,
                       nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
@@ -51,7 +64,7 @@ PlatformFile CreatePlatformFile(const std::string& path) {
   return ::CreateFile(ToUtf16(path).c_str(), GENERIC_READ | GENERIC_WRITE, 0,
                       nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 }
-
+#endif
 #else  // defined(WEBRTC_WIN)
 
 const PlatformFile kInvalidPlatformFileValue = -1;

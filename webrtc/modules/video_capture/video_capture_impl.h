@@ -83,6 +83,11 @@ public:
         return -1;
     }
     int32_t StopCapture() override { return -1; }
+    #ifdef WINRT
+    virtual bool SuspendCapture() { return false; }
+    virtual bool ResumeCapture() { return false; }
+    virtual bool IsSuspended() { return false; }
+    #endif
     bool CaptureStarted() override {return false; }
     int32_t CaptureSettings(VideoCaptureCapability& /*settings*/) override
     { return -1; }

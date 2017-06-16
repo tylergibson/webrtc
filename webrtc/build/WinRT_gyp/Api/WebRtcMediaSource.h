@@ -11,13 +11,13 @@
 #define WEBRTC_BUILD_WINRT_GYP_API_WEBRTCMEDIASOURCE_H_
 
 #include <wrl.h>
-#include <WebRtcMediaStream.h>
+#include "WebRtcMediaStream.h"
 #include <mfapi.h>
 #include <mfidl.h>
 #include <windows.media.h>
 #include <windows.media.core.h>
 #include "webrtc/system_wrappers/include/critical_section_wrapper.h"
-#include "webrtc/base/scoped_ptr.h"
+#include "webrtc/base/scoped_ref_ptr.h"
 #include "Media.h"
 
 interface IFrameSource;

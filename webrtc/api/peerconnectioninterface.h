@@ -90,6 +90,7 @@
 #include "webrtc/base/socketaddress.h"
 #include "webrtc/base/sslstreamadapter.h"
 #include "webrtc/media/base/mediachannel.h"
+#include "webrtc/media/base/mediaengine.h"
 #include "webrtc/media/base/videocapturer.h"
 #include "webrtc/p2p/base/portallocator.h"
 
@@ -986,7 +987,9 @@ class PeerConnectionFactoryInterface : public rtc::RefCountInterface {
   // TODO(ivoc) Remove after Chrome is updated.
   virtual void StopRtcEventLog() = 0;
 
+#ifdef WINRT
   virtual cricket::MediaEngineInterface* GetMediaEngine() = 0;
+#endif //WINRT
 
  protected:
   // Dtor and ctor protected as objects shouldn't be created or deleted via

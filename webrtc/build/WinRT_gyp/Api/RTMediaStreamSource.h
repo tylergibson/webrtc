@@ -13,7 +13,7 @@
 #include "Media.h"
 #include "MediaSourceHelper.h"
 #include "webrtc/api/mediastreaminterface.h"
-#include "webrtc/system_wrappers/include/tick_util.h"
+//#include "webrtc/system_wrappers/include/tick_util.h"
 #include "webrtc/system_wrappers/include/critical_section_wrapper.h"
 
 using Windows::Media::Core::MediaStreamSource;
@@ -78,12 +78,12 @@ namespace Org {
 				static MediaStreamSource^ CreateMediaSource(
 					MediaVideoTrack^ track, uint32 frameRate, String^ id);
 			private:
-				class RTCRenderer : public webrtc::VideoRendererInterface {
+				class RTCRenderer : public rtc::VideoSinkInterface<webrtc::VideoFrame> {
 				public:
 					explicit RTCRenderer(RTMediaStreamSource^ streamSource);
 					virtual ~RTCRenderer();
 					virtual void SetSize(uint32 width, uint32 height, uint32 reserved);
-					virtual void RenderFrame(const cricket::VideoFrame *frame);
+					virtual void RenderFrame(const webrtc::VideoFrame *frame);
 					virtual bool CanApplyRotation() { return true; }
 				private:
 					// This object is owned by RTMediaStreamSource
@@ -92,11 +92,11 @@ namespace Org {
 				};
 
 				RTMediaStreamSource(MediaVideoTrack^ videoTrack, bool isH264);
-				void ProcessReceivedFrame(cricket::VideoFrame *frame);
-				bool ConvertFrame(IMFMediaBuffer* mediaBuffer, cricket::VideoFrame* frame);
+				void ProcessReceivedFrame(webrtc::VideoFrame *frame);
+				bool ConvertFrame(IMFMediaBuffer* mediaBuffer, webrtc::VideoFrame* frame);
 				void ResizeSource(uint32 width, uint32 height);
 
-				HRESULT MakeSampleCallback(cricket::VideoFrame* frame, IMFSample** sample);
+				HRESULT MakeSampleCallback(webrtc::VideoFrame* frame, IMFSample** sample);
 				void FpsCallback(int fps);
 
 				MediaVideoTrack^ _videoTrack;
@@ -106,10 +106,10 @@ namespace Org {
 				// Keep a weak reference here.
 				// Its _mediaStreamSource that keeps a reference to this object.
 				WeakReference _mediaStreamSource;
-				rtc::scoped_ptr<RTCRenderer> _rtcRenderer;
-				rtc::scoped_ptr<webrtc::CriticalSectionWrapper> _lock;
+				rtc::scoped_refptr<RTCRenderer> _rtcRenderer;
+				rtc::scoped_refptr<webrtc::CriticalSectionWrapper> _lock;
 
-				rtc::scoped_ptr<MediaSourceHelper> _helper;
+				rtc::scoped_refptr<MediaSourceHelper> _helper;
 
 				ThreadPoolTimer^ _progressTimer;
 				void ProgressTimerElapsedExecute(ThreadPoolTimer^ source);

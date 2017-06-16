@@ -144,6 +144,7 @@ class VideoCapturer : public sigslot::has_slots<>,
     return capture_state_;
   }
 
+#ifdef WINRT
   // Suspend/Resume flow default behavior
   virtual bool Suspend() override { return false; }
   virtual bool Resume() override { return false; }
@@ -151,6 +152,7 @@ class VideoCapturer : public sigslot::has_slots<>,
 
   void SetIsH264Source(bool isH264) override { }
   bool IsH264Source() override { return false; }
+#endif
 
   virtual bool apply_rotation() { return apply_rotation_; }
 

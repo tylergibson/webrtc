@@ -181,7 +181,7 @@ rtc_static_library("rtc_base_approved") {
     sources += [ "file_posix.cc" ]
   }
 
-  if (is_win) {
+  if (is_win && !is_winrt) {
     sources += [ "file_win.cc" ]
   }
 
@@ -320,8 +320,16 @@ rtc_static_library("rtc_task_queue") {
         ]
       }
       if (is_win) {
-        sources += [ "task_queue_win.cc" ]
-      }
+        if(!is_winrt) {
+          sources += [ "task_queue_win.cc" ]
+        } else {
+          sources += [ 
+            "task_queue_stdlib.cc" ,
+            "tracelog.cc",
+            "tracelog.h",
+          ]
+        }
+      } 
     }
   }
 }
@@ -520,9 +528,13 @@ rtc_static_library("rtc_base") {
       sources += [
         "win32socketinit.cc",
         "win32socketinit.h",
-        "win32socketserver.cc",
-        "win32socketserver.h",
       ]
+      if(!is_winrt) {
+        sources += [
+          "win32socketserver.cc",
+          "win32socketserver.h",
+        ]
+      }
     }
 
     if (rtc_build_json) {
@@ -593,7 +605,7 @@ rtc_static_library("rtc_base") {
     ]
   }
 
-  if (is_win) {
+  if (is_win && !is_winrt) {
     sources += [
       "win32.cc",
       "win32.h",
@@ -619,6 +631,18 @@ rtc_static_library("rtc_base") {
     ]
 
     defines += [ "_CRT_NONSTDC_NO_DEPRECATE" ]
+  } else if (is_win && is_winrt) {
+    sources += [
+      "win32.cc",
+      "win32.h",
+      "win32filesystem.cc",
+      "win32filesystem.h",
+      "win32securityerrors.cc",
+      "winping.cc",
+      "winping.h",
+      "loggingserver.cc",
+      "loggingserver.h",
+    ]
   }
 
   if (is_posix) {

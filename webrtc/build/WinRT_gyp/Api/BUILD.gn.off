@@ -1,0 +1,69 @@
+# Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
+#
+# Use of this source code is governed by a BSD-style license
+# that can be found in the LICENSE file in the root of the source
+# tree. An additional intellectual property rights grant can be found
+# in the file PATENTS.  All contributing project authors may
+# be found in the AUTHORS file in the root of the source tree.
+
+import("../../../webrtc.gni")
+
+if(is_winrt) {
+  rtc_shared_library("web_rtc_foreground_render") {
+    sources = [
+      "SwapChainPanelSource.h",
+      "SwapChainPanelSource.cc",
+    ]
+
+    defines = [
+      "_WINRT_DLL",
+      "NTDDI_VERSION=NTDDI_WIN10",
+    ]
+  }
+
+  rtc_shared_library("org.webrtc") {
+    sources = [
+      "PeerConnectionInterface.h",
+      "PeerConnectionInterface.cc",
+      "GlobalObserver.h",
+      "GlobalObserver.cc",
+      "Marshalling.h",
+      "Marshalling.cc",
+      "Media.h",
+      "Media.cc",
+      "DataChannel.h",
+      "DataChannel.cc",
+      "Delegates.h",
+      "RTMediaStreamSource.h",
+      "RTMediaStreamSource.cc",
+      "MediaSourceHelper.h",
+      "MediaSourceHelper.cc",
+      "WebRtcMediaSource.h",
+      "WebRtcMediaSource.cc",
+      "WebRtcMediaStream.h",
+      "WebRtcMediaStream.cc",
+      "RTCStatsReport.h",
+    ]
+
+    deps = [
+          "../../../../webrtc/api:libjingle_peerconnection",
+          "../../../../third_party/h264_winrt:webrtc_h264_winrt",
+          "../stats:webrtc_stats_observer",
+          "//webrtc/system_wrappers:field_trial_default",
+    ]
+
+    include_dirs = [
+      "../etw",
+      "../../../../third_party/libyuv/include",
+    ]
+
+    cflags = [
+      "/wd4458",
+    ]
+
+    libs = [
+      "dxguid.lib",
+    ]
+    
+  }
+}

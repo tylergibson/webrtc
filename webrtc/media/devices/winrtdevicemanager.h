@@ -33,6 +33,7 @@
 #endif  // WINRT
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,7 @@
 #include "webrtc/base/sigslot.h"
 #include "webrtc/base/stringencode.h"
 #include "webrtc/base/logging.h"
+#include "webrtc/base/scoped_ref_ptr.h"
 
 namespace cricket {
 
@@ -62,7 +64,7 @@ class WinRTDeviceManager {
   bool GetAudioOutputDevices(std::vector<Device>* devices);
 
   bool GetVideoCaptureDevices(std::vector<Device>* devs);
-	VideoCapturer* WinRTDeviceManager::CreateVideoCapturer(const Device& device) const;
+	std::unique_ptr<VideoCapturer> WinRTDeviceManager::CreateVideoCapturer(const Device& device) const;
 
 	virtual void SetVideoDeviceCapturerFactory(
 		VideoDeviceCapturerFactory* video_device_capturer_factory) {

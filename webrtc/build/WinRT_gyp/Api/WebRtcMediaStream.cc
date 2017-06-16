@@ -85,7 +85,7 @@ namespace Org {
 
 				// Create the helper with the callback functions.
 				_helper.reset(new MediaSourceHelper(_isH264,
-					[this](cricket::VideoFrame* frame, IMFSample** sample) -> HRESULT {
+					[this](webrtc::VideoFrame* frame, IMFSample** sample) -> HRESULT {
 					return MakeSampleCallback(frame, sample);
 				},
 					[this](int fps) {
@@ -178,7 +178,7 @@ namespace Org {
 			}
 
 			void WebRtcMediaStream::RenderFrame(
-				const cricket::VideoFrame *frame) {
+				const webrtc::VideoFrame *frame) {
 				auto frameCopy = frame->Copy();
 				InterlockedIncrement(&_frameBeingQueued);
 				// Do the processing async because there's a risk of a deadlock otherwise.
@@ -225,7 +225,7 @@ namespace Org {
 			}
 
 			HRESULT WebRtcMediaStream::MakeSampleCallback(
-				const cricket::VideoFrame* frame, IMFSample** sample) {
+				const webrtc::VideoFrame* frame, IMFSample** sample) {
 				ComPtr<IMFSample> spSample;
 				RETURN_ON_FAIL(MFCreateSample(&spSample));
 

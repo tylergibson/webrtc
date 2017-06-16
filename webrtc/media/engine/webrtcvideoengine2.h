@@ -258,6 +258,13 @@ class WebRtcVideoChannel2 : public VideoMediaChannel, public webrtc::Transport {
     // WebRtcVideoSendStream acts as a source to the webrtc::VideoSendStream
     // in |stream_|. This is done to proxy VideoSinkWants from the encoder to
     // the worker thread.
+#ifdef WINRT
+    bool Suspend() override { return false; }
+    bool Resume() override { return false; }
+    bool IsSuspended() override { return false; }
+    void SetIsH264Source(bool isH264) override { }
+    bool IsH264Source() override { return false; }
+#endif
     void AddOrUpdateSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
                          const rtc::VideoSinkWants& wants) override;
     void RemoveSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink) override;

@@ -211,7 +211,7 @@ ref class CaptureDevice sealed {
     media_sink_video_sample_event_registration_token_;
 
   CaptureDeviceListener* capture_device_listener_;
-
+  
   bool capture_started_;
   VideoCaptureCapability frame_info_;
   std::unique_ptr<webrtc::EventWrapper> _stopped;
@@ -250,7 +250,6 @@ void CaptureDevice::CleanupMediaCapture() {
   Windows::Media::Capture::MediaCapture^ media_capture = media_capture_.Get();
   if (media_capture != nullptr) {
     media_capture->Failed -= media_capture_failed_event_registration_token_;
-    MediaCaptureDevicesWinRT::Instance()->RemoveMediaCapture(device_id_);
     media_capture_ = nullptr;
   }
 }
@@ -275,13 +274,11 @@ void CaptureDevice::Cleanup() {
           async_info.get();
           CleanupSink();
           CleanupMediaCapture();
-          device_id_ = nullptr;
           _stopped->Set();
         }
         catch (Platform::Exception^ e) {
           CleanupSink();
           CleanupMediaCapture();
-          device_id_ = nullptr;
           _stopped->Set();
           throw;
         }
@@ -290,7 +287,6 @@ void CaptureDevice::Cleanup() {
   } else {
     CleanupSink();
     CleanupMediaCapture();
-    device_id_ = nullptr;
   }
 }
 
@@ -665,8 +661,8 @@ void BlackFramesGenerator::Cleanup() {
   }
 }
 
-VideoCaptureWinRT::VideoCaptureWinRT(const int32_t id)
-  : VideoCaptureImpl(id),
+VideoCaptureWinRT::VideoCaptureWinRT()
+  : VideoCaptureImpl(),
     device_(nullptr),
     camera_location_(Panel::Unknown),
     display_orientation_(nullptr),
@@ -674,7 +670,6 @@ VideoCaptureWinRT::VideoCaptureWinRT(const int32_t id)
     last_frame_info_(),
     video_encoding_properties_(nullptr),
     media_encoding_profile_(nullptr) {
-  _captureDelay = 120;
   if (VideoCommonWinRT::GetCoreDispatcher() == nullptr) {
     LOG(LS_INFO) << "Using AppStateDispatcher as orientation source";
     AppStateDispatcher::Instance()->AddObserver(this);
@@ -696,8 +691,7 @@ VideoCaptureWinRT::~VideoCaptureWinRT() {
   }
 }
 
-int32_t VideoCaptureWinRT::Init(const int32_t id,
-  const char* device_unique_id) {
+int32_t VideoCaptureWinRT::Init(const char* device_unique_id) {
   CriticalSectionScoped cs(&_apiCs);
   const int32_t device_unique_id_length = (int32_t)strlen(device_unique_id);
   if (device_unique_id_length > kVideoCaptureUniqueNameLength) {

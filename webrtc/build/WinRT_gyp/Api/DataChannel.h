@@ -14,7 +14,7 @@
 #include <collection.h>
 #include "GlobalObserver.h"
 #include "webrtc/api/peerconnectioninterface.h"
-#include "webrtc/base/scoped_ptr.h"
+#include "webrtc/base/scoped_ref_ptr.h"
 #include "Delegates.h"
 
 using Platform::String;

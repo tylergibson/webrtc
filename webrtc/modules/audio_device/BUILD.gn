@@ -208,6 +208,7 @@ rtc_static_library("audio_device") {
         ]
       }
       if (is_win) {
+        if (target_os == "win") {
         sources += [
           "win/audio_device_core_win.cc",
           "win/audio_device_core_win.h",
@@ -219,6 +220,13 @@ rtc_static_library("audio_device") {
           "amstrmid.lib",
           "msdmo.lib",
         ]
+        #WinRT
+        } else {
+          sources += [
+            "win/audio_device_wasapi_win.cc",
+            "win/audio_device_wasapi_win.h",
+          ]
+        }
       }
       configs += [ ":audio_device_warnings_config" ]
     }

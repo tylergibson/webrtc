@@ -58,6 +58,13 @@ BEGIN_PROXY_MAP(VideoTrack)
 
   PROXY_METHOD1(void, RegisterObserver, ObserverInterface*)
   PROXY_METHOD1(void, UnregisterObserver, ObserverInterface*)
+#ifdef WINRT
+  PROXY_METHOD0(bool, Suspend)
+  PROXY_METHOD0(bool, Resume)
+  PROXY_METHOD0(bool, IsSuspended)
+  PROXY_METHOD1(void, SetIsH264Source, bool)
+  PROXY_METHOD0(bool, IsH264Source)
+#endif
 END_PROXY_MAP()
 
 }  // namespace webrtc

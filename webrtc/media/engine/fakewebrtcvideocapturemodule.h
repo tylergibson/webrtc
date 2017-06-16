@@ -44,6 +44,7 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
     return 0;
   }
 
+#ifdef WINRT
   bool SuspendCapture() override {
     // not implemented
     return false;
@@ -58,6 +59,7 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
     // not implemented
     return false;
   }
+#endif //WINRT
 
   const char* CurrentDeviceName() const override {
     return NULL;  // not implemented

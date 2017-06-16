@@ -71,6 +71,7 @@ BEGIN_SIGNALING_PROXY_MAP(PeerConnectionFactory)
   PROXY_METHOD1(bool, StartRtcEventLog, rtc::PlatformFile)
   PROXY_METHOD2(bool, StartRtcEventLog, rtc::PlatformFile, int64_t)
   PROXY_METHOD0(void, StopRtcEventLog)
+  PROXY_METHOD0(cricket::MediaEngineInterface*, GetMediaEngine)
 END_PROXY_MAP()
 
 }  // namespace webrtc

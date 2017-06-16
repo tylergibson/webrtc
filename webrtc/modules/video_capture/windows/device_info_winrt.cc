@@ -49,92 +49,58 @@ MediaCaptureDevicesWinRT^ MediaCaptureDevicesWinRT::Instance() {
   return instance;
 }
 
-void MediaCaptureDevicesWinRT::ClearCaptureDevicesCache() {
-  media_capture_map_.clear();
-}
-
 Platform::Agile<MediaCapture>
 MediaCaptureDevicesWinRT::GetMediaCapture(Platform::String^ device_id) {
   CriticalSectionScoped cs(critical_section_);
 
-  // We cache MediaCapture objects
-  auto iter = media_capture_map_.find(device_id);
-  if (iter != media_capture_map_.end()) {
-    return iter->second;
+  Platform::Agile<MediaCapture> media_capture_agile(ref new MediaCapture());
+
+  Concurrency::task<void> initialize_async_task;
+  auto handler = ref new DispatchedHandler(
+    [this, &initialize_async_task, media_capture_agile, device_id]() {
+    auto settings = ref new MediaCaptureInitializationSettings();
+    settings->VideoDeviceId = device_id;
+
+    // If Communications media category is configured, the
+    // GetAvailableMediaStreamProperties will report only H264 frame format
+    // for some devices (ex: Surface Pro 3). Since at the moment, WebRTC does
+    // not support receiving H264 frames from capturer, the Communications
+    // category is not configured.
+
+    // settings->MediaCategory =
+    //  Windows::Media::Capture::MediaCategory::Communications;
+    auto initOp = media_capture_agile->InitializeAsync(settings);
+    initialize_async_task = Concurrency::create_task(initOp).
+      then([this, media_capture_agile](Concurrency::task<void> initTask) {
+        try {
+          initTask.get();
+        } catch (Platform::Exception^ e) {
+          LOG(LS_ERROR)
+            << "Failed to initialize media capture device. "
+            << rtc::ToUtf8(e->Message->Data());
+        }
+      });
+  });
+
+Windows::UI::Core::CoreDispatcher^ _windowDispatcher =	VideoCommonWinRT::GetCoreDispatcher();
+  if (_windowDispatcher != nullptr) {
+    auto dispatcher_action = _windowDispatcher->RunAsync(
+      CoreDispatcherPriority::Normal, handler);
+    Concurrency::create_task(dispatcher_action).wait();
   } else {
-#if (defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP || \
-                                defined(WINDOWS_PHONE_APP)))
-    // WINDOWS_PHONE_APP is defined at gyp level to overcome the missing
-    // WINAPI_FAMILY when building with VS2015
-
-    // On some Windows Phone 8 devices, two calls of InitializeAsync on two
-    // different coexisting instances causes exception to be thrown from the
-    // second call.
-    // Since after calling the second InitializeAsync all further calls fail
-    // with exception, we maintain a maximum of one MediaCapture instance
-    // in cache.
-    // The behavior is present on Lumia620, OS version 8.10.14219.341 and
-    // 10.0.10586.36
-    media_capture_map_.clear();
-#endif
-    Platform::Agile<MediaCapture> media_capture_agile(ref new MediaCapture());
-
-    Concurrency::task<void> initialize_async_task;
-    auto handler = ref new DispatchedHandler(
-      [this, &initialize_async_task, media_capture_agile, device_id]() {
-      auto settings = ref new MediaCaptureInitializationSettings();
-      settings->VideoDeviceId = device_id;
-
-      // If Communications media category is configured, the
-      // GetAvailableMediaStreamProperties will report only H264 frame format
-      // for some devices (ex: Surface Pro 3). Since at the moment, WebRTC does
-      // not support receiving H264 frames from capturer, the Communications
-      // category is not configured.
-
-      // settings->MediaCategory =
-      //  Windows::Media::Capture::MediaCategory::Communications;
-      auto initOp = media_capture_agile->InitializeAsync(settings);
-      initialize_async_task = Concurrency::create_task(initOp).
-        then([this, media_capture_agile](Concurrency::task<void> initTask) {
-          try {
-            initTask.get();
-          } catch (Platform::Exception^ e) {
-            LOG(LS_ERROR)
-              << "Failed to initialize media capture device. "
-              << rtc::ToUtf8(e->Message->Data());
-          }
-        });
-    });
-
-	Windows::UI::Core::CoreDispatcher^ _windowDispatcher =	VideoCommonWinRT::GetCoreDispatcher();
-    if (_windowDispatcher != nullptr) {
-      auto dispatcher_action = _windowDispatcher->RunAsync(
-        CoreDispatcherPriority::Normal, handler);
-      Concurrency::create_task(dispatcher_action).wait();
-    } else {
-      handler->Invoke();
-    }
-
-    initialize_async_task.wait();
-
-    // Cache the MediaCapture object so we don't recreate it later.
-    media_capture_map_[device_id] = media_capture_agile;
-    return media_capture_agile;
+    handler->Invoke();
   }
-}
 
-void MediaCaptureDevicesWinRT::RemoveMediaCapture(Platform::String^ device_id) {
-  CriticalSectionScoped cs(critical_section_);
+  initialize_async_task.wait();
 
-  auto iter = media_capture_map_.find(device_id);
-  if (iter != media_capture_map_.end()) {
-    media_capture_map_.erase(iter);
-  }
+  // Cache the MediaCapture object so we don't recreate it later.
+  media_capture_ = media_capture_agile;
+  return media_capture_agile;
 }
 
 // static
-std::unique_ptr<DeviceInfoWinRT> DeviceInfoWinRT::Create(const int32_t id) {
-	std::unique_ptr<DeviceInfoWinRT> winrt_info(new DeviceInfoWinRT(id));
+std::unique_ptr<DeviceInfoWinRT> DeviceInfoWinRT::Create() {
+	std::unique_ptr<DeviceInfoWinRT> winrt_info(new DeviceInfoWinRT());
   if (winrt_info->Init() != 0) {
     winrt_info.reset();
     LOG(LS_ERROR) << "Failed to initialize device info object.";
@@ -142,7 +108,7 @@ std::unique_ptr<DeviceInfoWinRT> DeviceInfoWinRT::Create(const int32_t id) {
   return winrt_info;
 }
 
-DeviceInfoWinRT::DeviceInfoWinRT(const int32_t id) : DeviceInfoImpl(id) {
+DeviceInfoWinRT::DeviceInfoWinRT() : DeviceInfoImpl() {
 }
 
 DeviceInfoWinRT::~DeviceInfoWinRT() {

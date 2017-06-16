@@ -106,7 +106,11 @@ class PeerConnectionFactory : public PeerConnectionFactoryInterface {
   virtual rtc::Thread* worker_thread();
   virtual rtc::Thread* network_thread();
   const Options& options() const { return options_; }
-
+  cricket::MediaEngineInterface* GetMediaEngine() override
+  {
+      return channel_manager_->media_engine();
+  };
+  
  protected:
   PeerConnectionFactory(
       rtc::scoped_refptr<webrtc::AudioEncoderFactory> audio_encoder_factory,

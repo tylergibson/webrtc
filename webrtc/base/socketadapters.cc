@@ -16,7 +16,9 @@
 #include <errno.h>
 
 #if defined(WEBRTC_WIN)
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif //ndef WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -414,9 +416,9 @@ void AsyncHttpsProxySocket::ProcessLine(char * data, size_t len) {
           );
         //std::string msg("Please report the following information to foo@bar.com:\r\nUnknown methods: ");
         msg.append(unknown_mechanisms_);
-#if defined(WEBRTC_WIN)
+#if defined(WEBRTC_WIN) && !defined(WINRT)
         MessageBoxA(0, msg.c_str(), "Oops!", MB_OK);
-#endif
+#endif // #defined(WEBRTC_WIN) && !defined(WINRT)
 #if defined(WEBRTC_POSIX)
         // TODO: Raise a signal so the UI can be separated.
         LOG(LS_ERROR) << "Oops!\n\n" << msg;

@@ -16,6 +16,11 @@ group("api") {
   public_deps = [
     ":libjingle_peerconnection_api",
   ]
+  if(is_winrt) {
+    #public_deps += [
+    #  "../build/WinRT_gyp/api:org.webrtc"
+    #]
+  }
 }
 
 rtc_source_set("call_api") {

@@ -29,7 +29,7 @@ group("examples") {
     ]
   }
 
-  if (!build_with_chromium) {
+  if (!build_with_chromium && !is_winrt) {
     public_deps += [ ":stun_prober" ]
   }
 
@@ -37,14 +37,14 @@ group("examples") {
     public_deps += [ ":AppRTCMobile" ]
   }
 
-  if (is_linux || is_win) {
+  if(is_linux || (is_win && !is_winrt)) {
     public_deps += [
-      ":peerconnection_client",
-      ":peerconnection_server",
       ":relayserver",
       ":stunserver",
       ":turnserver",
-    ]
+      ":peerconnection_client",
+      ":peerconnection_server",
+    ]  
   }
 }
 

@@ -101,11 +101,11 @@ namespace Org {
 			_impl->GetSource()->Stop();
 		}
 
-		void MediaVideoTrack::SetRenderer(webrtc::VideoRendererInterface* renderer) {
+		void MediaVideoTrack::SetRenderer(rtc::VideoSinkInterface<webrtc::VideoFrame>* renderer) {
 			_impl->AddRenderer(renderer);
 		}
 
-		void MediaVideoTrack::UnsetRenderer(webrtc::VideoRendererInterface* renderer) {
+		void MediaVideoTrack::UnsetRenderer(rtc::VideoSinkInterface<webrtc::VideoFrame>* renderer) {
 			_impl->RemoveRenderer(renderer);
 		}
 
@@ -293,7 +293,7 @@ namespace Org {
 			_videoCaptureDeviceChanged(true),
 			_audioCaptureDeviceChanged(true),
 			_audioPlayoutDeviceChanged(true) {
-			_dev_manager = rtc::scoped_ptr<cricket::DeviceManagerInterface>
+			_dev_manager = rtc::scoped_refptr<cricket::DeviceManagerInterface>
 				(cricket::DeviceManagerFactory::Create());
 
 			if (!_dev_manager->Init()) {

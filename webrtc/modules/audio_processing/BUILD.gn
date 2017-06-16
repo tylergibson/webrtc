@@ -470,7 +470,7 @@ if (rtc_include_tests) {
       public_deps += [ ":intelligibility_proc" ]
     }
 
-    if (rtc_enable_protobuf) {
+    if (rtc_enable_protobuf && !is_winrt) {
       public_deps += [
         ":audioproc_f",
         ":audioproc_unittest_proto",
@@ -557,7 +557,7 @@ if (rtc_include_tests) {
       defines += [ "WEBRTC_AUDIOPROC_FLOAT_PROFILE" ]
     }
 
-    if (rtc_enable_protobuf) {
+    if (rtc_enable_protobuf && !is_winrt) {
       defines += [ "WEBRTC_AUDIOPROC_DEBUG_DUMP" ]
       deps += [
         ":audioproc_debug_proto",
@@ -663,7 +663,7 @@ if (rtc_include_tests) {
     }
   }
 
-  if (rtc_enable_protobuf) {
+  if (rtc_enable_protobuf && !is_winrt) {
     rtc_executable("unpack_aecdump") {
       testonly = true
       sources = [
@@ -798,7 +798,7 @@ if (rtc_include_tests) {
     }
   }
 
-  if (rtc_enable_protobuf) {
+  if (rtc_enable_protobuf && !is_winrt) {
     proto_library("audioproc_unittest_proto") {
       sources = [
         "test/unittest.proto",

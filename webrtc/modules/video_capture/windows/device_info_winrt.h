@@ -30,27 +30,22 @@ private ref class MediaCaptureDevicesWinRT sealed {
   virtual ~MediaCaptureDevicesWinRT();
 
   static MediaCaptureDevicesWinRT^ Instance();
-
-  void ClearCaptureDevicesCache();
                                                                                                                                                                                                                                                                                                     
  internal:
   Platform::Agile<Windows::Media::Capture::MediaCapture>
     GetMediaCapture(Platform::String^ device_id);
-  void RemoveMediaCapture(Platform::String^ device_id);
 
  private:
-  std::map<Platform::String^,
-           Platform::Agile<Windows::Media::Capture::MediaCapture> >
-    media_capture_map_;
+  Platform::Agile<Windows::Media::Capture::MediaCapture> media_capture_;
   CriticalSectionWrapper* critical_section_;
 };
 
 class DeviceInfoWinRT : public DeviceInfoImpl {
  public:
   // Factory function.
-  static std::unique_ptr<DeviceInfoWinRT> Create(const int32_t id);
+  static std::unique_ptr<DeviceInfoWinRT> Create();
 
-  explicit DeviceInfoWinRT(const int32_t id);
+  explicit DeviceInfoWinRT();
   virtual ~DeviceInfoWinRT();
 
   virtual uint32_t NumberOfDevices();
@@ -84,8 +79,6 @@ class DeviceInfoWinRT : public DeviceInfoImpl {
   virtual int32_t
     CreateCapabilityMap(const char* device_unique_id_utf8);
 };
-
 }  // namespace videocapturemodule
 }  // namespace webrtc
-
 #endif  // WEBRTC_MODULES_VIDEO_CAPTURE_WINDOWS_DEVICE_INFO_WINRT_H_

@@ -32,7 +32,11 @@ class VideoCaptureMF : public VideoCaptureImpl {
   virtual bool CaptureStarted();
   virtual int32_t CaptureSettings(
       VideoCaptureCapability& settings);  // NOLINT
-
+#ifdef WINRT
+  virtual bool SuspendCapture() { return false; }
+  virtual bool ResumeCapture() { return false; }
+  virtual bool IsSuspended() { return false; }
+#endif
  protected:
   virtual ~VideoCaptureMF();
 };

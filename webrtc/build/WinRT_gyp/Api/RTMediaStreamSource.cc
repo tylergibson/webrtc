@@ -143,7 +143,7 @@ namespace Org {
 
 				// Create the helper with the callback functions.
 				_helper.reset(new MediaSourceHelper(isH264,
-					[this](cricket::VideoFrame* frame, IMFSample** sample) -> HRESULT {
+					[this](webrtc::VideoFrame* frame, IMFSample** sample) -> HRESULT {
 					return MakeSampleCallback(frame, sample);
 				},
 					[this](int fps) {
@@ -218,7 +218,7 @@ namespace Org {
 			}
 
 			void RTMediaStreamSource::RTCRenderer::RenderFrame(
-				const cricket::VideoFrame *frame) {
+				const webrtc::VideoFrame *frame) {
 				auto stream = _streamSource.Resolve<RTMediaStreamSource>();
 				if (stream == nullptr) {
 					LOG(LS_WARNING) << "RTCRenderer::RenderFrame: associated stream is null";
@@ -297,7 +297,7 @@ namespace Org {
 			}
 
 			HRESULT RTMediaStreamSource::MakeSampleCallback(
-				cricket::VideoFrame* frame, IMFSample** sample) {
+				webrtc::VideoFrame* frame, IMFSample** sample) {
 				ComPtr<IMFSample> spSample;
 				HRESULT hr = MFCreateSample(spSample.GetAddressOf());
 				if (FAILED(hr)) {
@@ -395,7 +395,7 @@ namespace Org {
 			}
 
 			void RTMediaStreamSource::ProcessReceivedFrame(
-				cricket::VideoFrame *frame) {
+				webrtc::VideoFrame *frame) {
 				webrtc::CriticalSectionScoped csLock(_lock.get());
 
 				if (_startingDeferral != nullptr) {

@@ -50,6 +50,16 @@ class VideoBroadcaster : public VideoSourceBase,
   // to the VideoSinkWants.
   void OnFrame(const webrtc::VideoFrame& frame) override;
 
+  #ifdef WINRT
+  // Suspend/Resume flow default behavior
+  virtual bool Suspend() override { return false; }
+  virtual bool Resume() override { return false; }
+  virtual bool IsSuspended() override { return false; }
+
+  void SetIsH264Source(bool isH264) override { }
+  bool IsH264Source() override { return false; }
+#endif
+
  protected:
   void UpdateWants() EXCLUSIVE_LOCKS_REQUIRED(sinks_and_wants_lock_);
   const rtc::scoped_refptr<webrtc::VideoFrameBuffer>& GetBlackFrameBuffer(

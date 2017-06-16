@@ -56,10 +56,11 @@ class WebRtcVideoCapturer : public VideoCapturer,
   bool IsRunning() override;
   bool IsScreencast() const override { return false; }
 
+#ifdef WINRT
   virtual bool Suspend();
   virtual bool Resume();
   virtual bool IsSuspended();
-
+#endif //WINRT
 
  protected:
   void OnSinkWantsChanged(const rtc::VideoSinkWants& wants) override;

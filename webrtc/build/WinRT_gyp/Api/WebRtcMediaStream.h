@@ -15,7 +15,7 @@
 #include <vector>
 #include "webrtc/api/mediastreaminterface.h"
 #include "webrtc/system_wrappers/include/critical_section_wrapper.h"
-#include "webrtc/base/scoped_ptr.h"
+#include "webrtc/base/scoped_ref_ptr.h"
 #include "Media.h"
 #include "MediaSourceHelper.h"
 
@@ -35,7 +35,6 @@ namespace Org {
 				public RuntimeClass<RuntimeClassFlags<RuntimeClassType::WinRtClassicComMix>,
 				IMFMediaStream, IMFMediaEventGenerator,
 				IMFGetService>,
-				public webrtc::VideoRendererInterface {
 				InspectableClass(L"WebRtcMediaStream", BaseTrust)
 			public:
 				WebRtcMediaStream();
@@ -60,7 +59,7 @@ namespace Org {
 				IFACEMETHOD(GetService)(REFGUID guidService, REFIID riid, LPVOID *ppvObject);
 
 				// VideoRendererInterface
-				virtual void RenderFrame(const cricket::VideoFrame *frame);
+				virtual void RenderFrame(const webrtc::VideoFrame *frame);
 
 				STDMETHOD(Start)(IMFPresentationDescriptor *pPresentationDescriptor,
 					const GUID *pguidTimeFormat, const PROPVARIANT *pvarStartPosition);
@@ -68,7 +67,7 @@ namespace Org {
 				STDMETHOD(Shutdown)();
 				STDMETHOD(SetD3DManager)(ComPtr<IMFDXGIDeviceManager> manager);
 
-				rtc::scoped_ptr<webrtc::CriticalSectionWrapper> _lock;
+				rtc::scoped_refptr<webrtc::CriticalSectionWrapper> _lock;
 
 			private:
 				ComPtr<IMFMediaEventQueue> _eventQueue;
@@ -79,7 +78,7 @@ namespace Org {
 
 				static HRESULT CreateMediaType(unsigned int width, unsigned int height,
 					unsigned int rotation, IMFMediaType** ppType, bool isH264);
-				HRESULT MakeSampleCallback(const cricket::VideoFrame* frame, IMFSample** sample);
+				HRESULT MakeSampleCallback(const webrtc::VideoFrame* frame, IMFSample** sample);
 				void FpsCallback(int fps);
 
 				HRESULT ReplyToSampleRequest();

@@ -136,13 +136,14 @@ rtc_static_library("metrics_default") {
     "source/metrics_default.cc",
   ]
 }
-
 group("system_wrappers_default") {
-  deps = [
-    ":field_trial_default",
-    ":metrics_default",
-    ":system_wrappers",
-  ]
+  if(!(is_win && is_winrt)) {
+    deps = [
+      ":field_trial_default",
+      ":metrics_default",
+      ":system_wrappers",
+    ]
+  }
 }
 
 if (is_android) {

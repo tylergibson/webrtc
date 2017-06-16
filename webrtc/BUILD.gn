@@ -235,7 +235,7 @@ if (!build_with_chromium) {
 
     # complete_static_lib doesn't work on Mac since libtool cannot support
     # multiple objects with the same filenames (https://bugs.webrtc.org/6418).
-    if (is_win || is_linux || is_android) {
+    if ((is_win && !is_winrt) || is_linux || is_android) {
       complete_static_lib = true
     } else {
       # TODO(kjellander): Remove this whenever possible. GN's static_library

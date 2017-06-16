@@ -12,7 +12,6 @@
 #include <string>
 #include "webrtc/api/statstypes.h"
 #include "webrtc/base/sigslot.h"
-#include "webrtc/base/scoped_ptr.h"
 #include "webrtc/base/scoped_ref_ptr.h"
 
 namespace rtc {
@@ -33,7 +32,7 @@ public:
   bool ProcessStats(const StatsReports& reports, rtc::scoped_refptr<webrtc::PeerConnectionInterface> pci);
 
 private:
-  rtc::scoped_ptr<rtc::AsyncSocket> socket_;
+  AsyncSocket* socket_;
   rtc::Thread* thread_;
 
   std::string local_host_name_;

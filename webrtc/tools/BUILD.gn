@@ -15,13 +15,24 @@ group("tools") {
 
   public_deps = [
     ":command_line_parser",
-    ":frame_analyzer",
-    ":frame_editor",
-    ":psnr_ssim_analyzer",
-    ":rgba_to_i420_converter",
   ]
+
+  # Disabling for WinRT Builds.  When WinRT video support is 
+  # complete, should extend/refactor to enable these tools
+  if(!is_winrt) {
+    public_deps += [
+      ":frame_analyzer",
+      ":frame_editor",
+      ":psnr_ssim_analyzer",
+      ":rgba_to_i420_converter",
+    ]
+  }
+
   if (rtc_include_internal_audio_device) {
-    public_deps += [ ":force_mic_volume_max" ]
+    # Disabling for WinRT, this is only used in browser bot testing
+    if (!is_winrt) {
+      public_deps += [ ":force_mic_volume_max" ]
+    }
   }
   if (rtc_enable_protobuf) {
     public_deps += [ ":chart_proto" ]
@@ -159,21 +170,25 @@ rtc_executable("frame_editor") {
 
 # It doesn't make sense to build this tool without the ADM enabled.
 if (rtc_include_internal_audio_device) {
-  rtc_executable("force_mic_volume_max") {
-    sources = [
-      "force_mic_volume_max/force_mic_volume_max.cc",
-    ]
+  # Disabling for WinRT, this is only used in browser bot testing
+  if (target_os != "winrt_81" && target_os != "winrt_81_phone" &&
+    target_os != "winrt_10") {
+    rtc_executable("force_mic_volume_max") {
+      sources = [
+        "force_mic_volume_max/force_mic_volume_max.cc",
+      ]
 
-    if (!build_with_chromium && is_clang) {
-      # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
-      suppressed_configs += [ "//build/config/clang:find_bad_constructs" ]
+      if (!build_with_chromium && is_clang) {
+        # Suppress warnings from the Chromium Clang plugin (bugs.webrtc.org/163).
+        suppressed_configs += [ "//build/config/clang:find_bad_constructs" ]
+      }
+
+      deps = [
+        "../modules/audio_device",
+        "../system_wrappers:system_wrappers_default",
+        "//build/win:default_exe_manifest",
+      ]
     }
-
-    deps = [
-      "../modules/audio_device",
-      "../system_wrappers:system_wrappers_default",
-      "//build/win:default_exe_manifest",
-    ]
   }
 }
 
