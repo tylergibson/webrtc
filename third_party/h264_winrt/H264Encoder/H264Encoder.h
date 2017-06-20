@@ -22,7 +22,7 @@
 #include "webrtc/video_encoder.h"
 #include "webrtc/system_wrappers/include/critical_section_wrapper.h"
 #include "webrtc/modules/video_coding/utility/quality_scaler.h"
-#include "webrtc/modules/video_coding/utility/h264_bitstream_parser.h"
+#include "webrtc/common_video/h264/h264_bitstream_parser.h"
 
 #pragma comment(lib, "mfreadwrite")
 #pragma comment(lib, "mfplat")

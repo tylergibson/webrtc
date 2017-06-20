@@ -107,7 +107,7 @@ if (!build_with_chromium) {
     if (is_win) {
       libs = [ "Strmiids.lib" ]
     }
-    if (is_win && !is_winrt) {
+    if (is_win) {
       sources = [
         "windows/device_info_ds.cc",
         "windows/device_info_ds.h",
@@ -124,21 +124,21 @@ if (!build_with_chromium) {
         "windows/video_capture_mf.h",
       ]
       deps += [ "//third_party/winsdk_samples" ]
-    }
-    #WinRT
-    if (is_win && is_winrt) {
-      sources = [
-        "windows/device_info_winrt.cc",
-        "windows/device_info_winrt.h",
-        "windows/video_capture_factory_windows.cc",
-        "windows/video_capture_sink_winrt.cc",
-        "windows/video_capture_sink_winrt.h",
-        "windows/video_capture_winrt.cc",
-        "windows/video_capture_winrt.h",
-      ]
 
-      deps += [ "//third_party/libyuv" ]
+      if (is_winrt) {
+        sources += [
+          "windows/device_info_winrt.cc",
+          "windows/device_info_winrt.h",
+          "windows/video_capture_sink_winrt.cc",
+          "windows/video_capture_sink_winrt.h",
+          "windows/video_capture_winrt.cc",
+          "windows/video_capture_winrt.h",
+        ]
+
+        deps += [ "//third_party/libyuv" ]
+      }
     }
+
     if (is_ios || is_mac) {
       sources = [
         "objc/device_info.h",
